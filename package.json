@@ -2,10 +2,25 @@
   "name": "basedakp48-plugin-shrugbot",
   "version": "1.0.0",
   "description": "¯\\_(ツ)_/¯",
-  "main": "index.js",
-  "repository": "git@github.com:BasedAKP48/ShrugBot.git",
-  "author": "Austin Peterson <austin@akpwebdesign.com>",
   "license": "MIT",
+  "repository": "BasedAKP48/ShrugBot",
+  "author": {
+    "name": "Austin Peterson",
+    "email": "austin@akpwebdesign.com",
+    "url": "blog.akpwebdesign.com"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "basedakp48-plugin"
+  ],
   "dependencies": {
     "firebase-admin": "^5.0.0"
   }
