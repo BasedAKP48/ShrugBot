@@ -74,19 +74,12 @@ function sendMessage(msg, text) {
   if(!canSend(text, msg.channel)) { return; }
   let response = {
     uid: 'ShrugBot',
-    cid: 'ShrugBot',
+    cid: msg.cid,
     text: text,
     channel: msg.channel,
     msgType: 'chatMessage',
     timeReceived: Date.now()
   }
 
-  let responseRef = rootRef.child('messages').push();
-  let responseKey = responseRef.key;
-
-  let updateData = {};
-  updateData[`messages/${responseKey}`] = response;
-  updateData[`clients/${msg.cid}/${responseKey}`] = response;
-
-  return rootRef.update(updateData);
+  return rootRef.child('outgoingMessages').push().set(msg);
 }
