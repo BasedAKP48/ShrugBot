@@ -81,5 +81,5 @@ function sendMessage(msg, text) {
     timeReceived: Date.now()
   }
 
-  return rootRef.child('outgoingMessages').push().set(msg);
+  return rootRef.child('outgoingMessages').push().set(response);
 }
