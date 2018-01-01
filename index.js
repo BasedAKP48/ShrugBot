@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const { presenceSystem } = require('basedakp48-plugin-utils');
 
 const DEFAULT_CONFIG = require("./defaultConfig.js");
 const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
@@ -20,9 +21,7 @@ try {
   fs.writeFileSync('./cid.json', JSON.stringify(cid), {encoding: 'UTF-8'});
 }
 
-let registryRef = rootRef.child('pluginRegistry').child(cid);
 let configRef = rootRef.child('config/plugins').child(cid);
-let presenceRef = registryRef.child('presence');
 let config = DEFAULT_CONFIG;
 let shrugTimes = {};
 
@@ -30,29 +29,12 @@ let shrugTimes = {};
 let initialConn = false;
 
 // track when we connect and disconnect to/from Firebase and log.
-rootRef.child('.info/connected').on('value', (snapshot) => {
-  if (snapshot.val() === true) {
-    console.log('connected to Firebase!');
-    initialConn = true;
-
-    // on connect, set registryRef with information about the plugin
-    registryRef.update({
-      info: {
-        pluginName: pkg.name,
-        pluginVersion: pkg.version,
-        pluginDepends: pkg.dependencies,
-        instanceName: 'ShrugBot',
-        listenMode: 'normal'
-      }
-    });
-
-    // on connect, set presenceRef to connected status
-    presenceRef.update({connected: true, lastConnect: admin.database.ServerValue.TIMESTAMP});
-    // on disconnect, set presenceRef to disconnected status
-    presenceRef.onDisconnect().update({connected: false, lastDisconnect: admin.database.ServerValue.TIMESTAMP});
-  } else if (initialConn === true) {
-    console.log('disconnected from Firebase!');
-  }
+presenceSystem({
+  rootRef,
+  cid,
+  pkg,
+  instanceName: 'ShrugBot',
+  listenMode: 'normal',
 });
 
 // get config from server. set config to default if server config doesn't exist.

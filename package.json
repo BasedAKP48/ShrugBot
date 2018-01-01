@@ -22,6 +22,7 @@
     "basedakp48-plugin"
   ],
   "dependencies": {
+    "basedakp48-plugin-utils": "^1.0.0",
     "firebase-admin": "^5.0.0"
   }
 }
