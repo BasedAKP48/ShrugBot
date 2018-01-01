@@ -7,7 +7,7 @@
   "author": {
     "name": "Austin Peterson",
     "email": "austin@akpwebdesign.com",
-    "url": "blog.akpwebdesign.com"
+    "url": "https://blog.akpwebdesign.com"
   },
   "engines": {
     "node": ">=6"
