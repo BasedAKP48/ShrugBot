@@ -41,7 +41,7 @@ rootRef.child('.info/connected').on('value', (snapshot) => {
         pluginName: pkg.name,
         pluginVersion: pkg.version,
         pluginDepends: pkg.dependencies,
-        instanceName: 'Shrugbot',
+        instanceName: 'ShrugBot',
         listenMode: 'normal'
       }
     });
