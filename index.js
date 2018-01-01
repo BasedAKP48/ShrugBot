@@ -67,7 +67,6 @@ rootRef.child('config/plugins/ShrugBot').on('value', (d) => {
 rootRef.child('messages').orderByChild('timeReceived').startAt(Date.now()).on('child_added', (e) => {
   if(!config) { return; } // We can't do anything without a config, so let's give up early.
   let msg = e.val();
-  console.log(msg);
   let text = msg.text.toLowerCase().split(' ');
 
   let sendCount = 0;
