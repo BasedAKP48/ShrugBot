@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const { presenceSystem } = require('basedakp48-plugin-utils');
+const { PresenceSystem } = require('basedakp48-plugin-utils');
 
 const DEFAULT_CONFIG = require("./defaultConfig.js");
 const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
@@ -29,7 +29,14 @@ let shrugTimes = {};
 let initialConn = false;
 
 // track when we connect and disconnect to/from Firebase and log.
-presenceSystem({
+const presenceSystem = new PresenceSystem();
+presenceSystem.on('connect', () => {
+  console.log('connected to Firebase!');
+});
+presenceSystem.on('disconnect', () => {
+  console.log('disconnected from Firebase!');
+});
+presenceSystem.initialize({
   rootRef,
   cid,
   pkg,
