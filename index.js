@@ -36,7 +36,7 @@ rootRef.child('.info/connected').on('value', (snapshot) => {
     initialConn = true;
 
     // on connect, set registryRef with information about the plugin
-    registryRef.set({
+    registryRef.update({
       info: {
         pluginName: pkg.name,
         pluginVersion: pkg.version,
