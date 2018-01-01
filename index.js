@@ -41,7 +41,6 @@ presenceSystem.initialize({
   cid,
   pkg,
   instanceName: 'ShrugBot',
-  listenMode: 'normal',
 });
 
 // get config from server. set config to default if server config doesn't exist.
