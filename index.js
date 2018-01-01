@@ -21,8 +21,9 @@ try {
 }
 
 let registryRef = rootRef.child('pluginRegistry').child(cid);
+let configRef = rootRef.child('config/plugins').child(cid);
 let presenceRef = registryRef.child('presence');
-let config;
+let config = DEFAULT_CONFIG;
 let shrugTimes = {};
 
 // this is used to stop an initial 'disconnected' message from being sent.
@@ -54,14 +55,13 @@ rootRef.child('.info/connected').on('value', (snapshot) => {
   }
 });
 
-// TODO: Allow multiple configs for a plugin by keying under a unique ID.
-rootRef.child('config/plugins/ShrugBot').on('value', (d) => {
-  config = d.val();
-  if(!config) {
+// get config from server. set config to default if server config doesn't exist.
+configRef.on('value', (d) => {
+  if(d.val()) {
+    config = d.val();
+  } else {
     d.ref.set(DEFAULT_CONFIG);
-    config = DEFAULT_CONFIG;
   }
-  return;
 });
 
 rootRef.child('messages').orderByChild('timeReceived').startAt(Date.now()).on('child_added', (e) => {
