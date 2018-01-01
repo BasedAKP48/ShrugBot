@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 const DEFAULT_CONFIG = require("./defaultConfig.js");
 const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
 const pkg = require('./package.json');
-const cid;
+let cid;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -114,14 +114,27 @@ function canSend(cmd, to) {
 
 function sendMessage(msg, text) {
   if(!canSend(text, msg.channel)) { return; }
-  let response = {
-    uid: 'ShrugBot',
-    cid: msg.cid,
-    text: text,
-    channel: msg.channel,
-    msgType: 'chatMessage',
-    timeReceived: Date.now()
+  let extra_client_info = null;
+
+  if (msg.extra_client_info) {
+    if (msg.extra_client_info.connectorType === 'discord') {
+      text = `\`${text}\``;
+    }
+    extra_client_info = msg.extra_client_info;
+    extra_client_info.pluginName = pkg.name;
+    extra_client_info.pluginInstance = cid;
   }
 
-  return rootRef.child('outgoingMessages').push().set(response);
+  let response = {
+    uid: cid,
+    target: msg.cid,
+    text: text,
+    channel: msg.channel,
+    type: 'text',
+    direction: 'out',
+    timeReceived: Date.now(),
+    extra_client_info
+  }
+
+  return rootRef.child('pendingMessages').push().set(response);
 }
