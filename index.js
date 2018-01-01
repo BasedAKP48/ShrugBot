@@ -2,6 +2,8 @@ const admin = require('firebase-admin');
 
 const DEFAULT_CONFIG = require("./defaultConfig.js");
 const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
+const pkg = require('./package.json');
+const cid;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -9,8 +11,48 @@ admin.initializeApp({
 });
 
 const rootRef = admin.database().ref();
+
+try {
+  cid = require('./cid.json');
+} catch (e) {
+  let fs = require('fs');
+  cid = rootRef.child('pluginRegistry').push().key;
+  fs.writeFileSync('./cid.json', JSON.stringify(cid), {encoding: 'UTF-8'});
+}
+
+let registryRef = rootRef.child('pluginRegistry').child(cid);
+let presenceRef = registryRef.child('presence');
 let config;
 let shrugTimes = {};
+
+// this is used to stop an initial 'disconnected' message from being sent.
+let initialConn = false;
+
+// track when we connect and disconnect to/from Firebase and log.
+rootRef.child('.info/connected').on('value', (snapshot) => {
+  if (snapshot.val() === true) {
+    console.log('connected to Firebase!');
+    initialConn = true;
+
+    // on connect, set registryRef with information about the plugin
+    registryRef.set({
+      info: {
+        pluginName: pkg.name,
+        pluginVersion: pkg.version,
+        pluginDepends: pkg.dependencies,
+        instanceName: 'Shrugbot',
+        listenMode: 'normal'
+      }
+    });
+
+    // on connect, set presenceRef to connected status
+    presenceRef.update({connected: true, lastConnect: admin.database.ServerValue.TIMESTAMP});
+    // on disconnect, set presenceRef to disconnected status
+    presenceRef.onDisconnect().update({connected: false, lastDisconnect: admin.database.ServerValue.TIMESTAMP});
+  } else if (initialConn === true) {
+    console.log('disconnected from Firebase!');
+  }
+});
 
 // TODO: Allow multiple configs for a plugin by keying under a unique ID.
 rootRef.child('config/plugins/ShrugBot').on('value', (d) => {
