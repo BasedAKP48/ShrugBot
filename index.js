@@ -1,41 +1,29 @@
 const admin = require('firebase-admin');
-const { PresenceSystem } = require('basedakp48-plugin-utils');
+const { initialize, getCID, PresenceSystem } = require('@basedakp48/plugin-utils');
 
 const DEFAULT_CONFIG = require("./defaultConfig.js");
 const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
 const pkg = require('./package.json');
-let cid;
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://basedakp48.firebaseio.com"
-});
-
+initialize(admin, serviceAccount);
 const rootRef = admin.database().ref();
-
-try {
-  cid = require('./cid.json');
-} catch (e) {
-  let fs = require('fs');
-  cid = rootRef.child('pluginRegistry').push().key;
-  fs.writeFileSync('./cid.json', JSON.stringify(cid), {encoding: 'UTF-8'});
-}
+const cid = getCID(rootRef, __dirname);
 
 let configRef = rootRef.child('config/plugins').child(cid);
 let config = DEFAULT_CONFIG;
 let shrugTimes = {};
 
-// this is used to stop an initial 'disconnected' message from being sent.
-let initialConn = false;
-
 // track when we connect and disconnect to/from Firebase and log.
-const presenceSystem = new PresenceSystem();
+const presenceSystem = PresenceSystem();
+
 presenceSystem.on('connect', () => {
   console.log('connected to Firebase!');
 });
+
 presenceSystem.on('disconnect', () => {
   console.log('disconnected from Firebase!');
 });
+
 presenceSystem.initialize({
   rootRef,
   cid,
