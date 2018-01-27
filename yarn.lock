@@ -2,10 +2,11 @@
 # yarn lockfile v1
 
 
-"@basedakp48/plugin-utils@^1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@basedakp48/plugin-utils/-/plugin-utils-1.10.0.tgz#6ff8b252c38bb0cbe154ed490d199d57fb2f9e6d"
+"@basedakp48/plugin-utils@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@basedakp48/plugin-utils/-/plugin-utils-1.13.0.tgz#0c305e28725813408f09f2af7af397cd2f1cf3e0"
   dependencies:
+    "@firebase/database-types" "^0.1.1"
     firebase-admin "^5.6.0"
 
 "@firebase/app-types@0.1.0":
@@ -22,6 +23,10 @@
 "@firebase/database-types@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@firebase/database-types/-/database-types-0.1.0.tgz#dbc9e096cf1061ac422f17e8957baac6d3c018a7"
+
+"@firebase/database-types@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@firebase/database-types/-/database-types-0.1.1.tgz#601b8040191766777b785c1675eac34ce57c669c"
 
 "@firebase/database@^0.1.3":
   version "0.1.6"

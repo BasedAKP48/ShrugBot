@@ -1,20 +1,21 @@
 const admin = require('firebase-admin');
-const { initialize, getCID, PresenceSystem } = require('@basedakp48/plugin-utils');
+const path = require('path');
+const { Plugin, getReply } = require('@basedakp48/plugin-utils');
 
 const DEFAULT_CONFIG = require("./defaultConfig.js");
-const serviceAccount = require("./serviceAccount.json"); // TODO: Make this configurable on the command line.
-const pkg = require('./package.json');
 
-initialize(admin, serviceAccount);
-const rootRef = admin.database().ref();
-const cid = getCID(rootRef, __dirname);
+const plugin = new Plugin({
+  name: 'ShrugBot',
+  cidPath: path.resolve('./cid.json'),
+});
 
-let configRef = rootRef.child('config/plugins').child(cid);
+let configRef = admin.database().ref('/config/plugins').child(plugin.cid);
 let config = DEFAULT_CONFIG;
 let shrugTimes = {};
 
 // track when we connect and disconnect to/from Firebase and log.
-const presenceSystem = PresenceSystem();
+const presenceSystem = plugin.presenceSystem();
+const messageSystem = plugin.messageSystem();
 
 presenceSystem.on('connect', () => {
   console.log('connected to Firebase!');
@@ -22,13 +23,6 @@ presenceSystem.on('connect', () => {
 
 presenceSystem.on('disconnect', () => {
   console.log('disconnected from Firebase!');
-});
-
-presenceSystem.initialize({
-  rootRef,
-  cid,
-  pkg,
-  instanceName: 'ShrugBot',
 });
 
 // get config from server. set config to default if server config doesn't exist.
@@ -40,9 +34,8 @@ configRef.on('value', (d) => {
   }
 });
 
-rootRef.child('messages').orderByChild('timeReceived').startAt(Date.now()).on('child_added', (e) => {
+messageSystem.on('message-in', (msg) => {
   if(!config) { return; } // We can't do anything without a config, so let's give up early.
-  let msg = e.val();
   let text = msg.text.toLowerCase().split(' ');
 
   let sendCount = 0;
@@ -89,27 +82,17 @@ function canSend(cmd, to) {
 
 function sendMessage(msg, text) {
   if(!canSend(text, msg.channel)) { return; }
-  let extra_client_info = null;
+  let data = null;
 
-  if (msg.extra_client_info) {
-    if (msg.extra_client_info.connectorType === 'discord') {
+  if (msg.data) {
+    if (msg.data.connectorType === 'discord') {
       text = `\`${text}\``;
     }
-    extra_client_info = msg.extra_client_info;
-    extra_client_info.pluginName = pkg.name;
-    extra_client_info.pluginInstance = cid;
+    data = msg.data;
+    data.pluginName = pkg.name;
+    data.pluginInstance = cid;
   }
 
-  let response = {
-    uid: cid,
-    target: msg.cid,
-    text: text,
-    channel: msg.channel,
-    type: 'text',
-    direction: 'out',
-    timeReceived: Date.now(),
-    extra_client_info
-  }
-
-  return rootRef.child('pendingMessages').push().set(response);
+  let response = getReply(msg, cid, text, data);
+  return messageSystem.sendMessage(response);
 }
